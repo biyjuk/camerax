@@ -14,10 +14,15 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Install Android SDK parts
+      - name: Prepare Android SDK
         run: |
-          yes | sdkmanager --licenses > /dev/null || true
-          sdkmanager "platforms;android-34" "build-tools;34.0.0"
+          SDKM="${ANDROID_HOME:-$ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
+          if [ -x "$SDKM" ]; then
+            yes | "$SDKM" --licenses > /dev/null || true
+            "$SDKM" "platforms;android-34" "build-tools;34.0.0" || true
+          else
+            echo "sdkmanager not found - using the SDK preinstalled on the runner"
+          fi
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.5'
